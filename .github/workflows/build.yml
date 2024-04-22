@@ -34,10 +34,14 @@ jobs:
           install: >-
             isl
             isl-devel
+            mpc
+            mpc-devel
             gmp
             gmp-devel
             mpfr
             mpfr-devel
+            libiconv
+            libiconv-devel
             gcc
             make
             bison
