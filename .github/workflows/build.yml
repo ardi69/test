@@ -51,4 +51,4 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Run a script
-        run: build.sh
+        run: test.sh
