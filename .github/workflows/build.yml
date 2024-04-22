@@ -31,8 +31,9 @@ jobs:
         with:
           msystem: ucrt64
           update: false # true
-
-
+          install: >-
+            make
+            bison
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
 #      - run: git config --global core.autocrlf input
