@@ -60,7 +60,7 @@ jobs:
         run:  gcc -dumpmachine
 
       - name: Run a one-line script
-        run:  env
+        run:  pacman -Q
 
       - name: Run a one-line script
         run:  exit 1
