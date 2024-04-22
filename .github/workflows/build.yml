@@ -42,7 +42,9 @@ jobs:
             make
             bison
             texinfo
+            flex
             patch
+            diffutils
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
 #      - run: git config --global core.autocrlf input
