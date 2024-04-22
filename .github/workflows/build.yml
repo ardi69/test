@@ -31,24 +31,26 @@ jobs:
         with:
           msystem: ucrt64
           update: false #true
+          install: >-
+            isl-devel
+            mpc-devel
+            gmp-devel
+            mpfr-devel
+            libiconv-devel
+            bison
+            texinfo
+            flex
+            patch
+            diffutils
+          
           pacboy: >-
             isl:p
-            isl-devel:p
             mpc:p
-            mpc-devel:p
             gmp:p
-            gmp-devel:p
             mpfr:p
-            mpfr-devel:p
             libiconv:p
-            libiconv-devel:p
             gcc:p
             make:p
-            bison:p
-            texinfo:p
-            flex:p
-            patch:p
-            diffutils:p
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
 #      - run: git config --global core.autocrlf input
