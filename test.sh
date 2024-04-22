@@ -27,3 +27,11 @@ if [ -z "$GAWK" ]; then
 fi
 echo use $GAWK as gawk
 export GAWK
+
+echo find fetch
+if [ -z "$FETCH" ]; then
+	if [ -z "$FETCH" -a -x "$(which wget 2>/dev/null)" ]; then FETCH="$(which wget 2>/dev/null) --no-check-certificate -O"; fi
+	if [ -z "$FETCH" -a -x "$(which curl 2>/dev/null)" ]; then FETCH="$(which curl 2>/dev/null) -k -f -L -o"; fi
+	[ -z "$FETCH" ] && { echo "ERROR: Please make sure you have wget or curl installed."; exit 1; }
+fi
+echo use $FETCH for fetch
