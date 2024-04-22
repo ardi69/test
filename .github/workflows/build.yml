@@ -32,13 +32,16 @@ jobs:
           msystem: ucrt64
           update: false # true
           install: >-
+            isl
+            isl-devel
+            gmp
+            gmp-devel
+            mpfr
+            mpfr-devel
             gcc
             make
             bison
             texinfo
-            isl
-            gmp
-            mpfr
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
 #      - run: git config --global core.autocrlf input
