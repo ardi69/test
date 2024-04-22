@@ -13,6 +13,7 @@ export MAKE
 echo find makeinfo
 which makeinfo >/dev/null 2>&1 || { echo "Can't find makinfo. Please Install e.g. pacman -S texinfo";  }
 which bison >/dev/null 2>&1 || { echo "Can't find bison. Please Install e.g. pacman -S bison";  }
+which gcc >/dev/null 2>&1 || { echo "Can't find bison. Please Install e.g. pacman -S gcc";  }
 
 
 #---------------------------------------------------------------------------------
