@@ -33,7 +33,7 @@ jobs:
           update: true
 
 
-      - name: '🧰 Checkout'
+     # - name: '🧰 Checkout'
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - run: git config --global core.autocrlf input
