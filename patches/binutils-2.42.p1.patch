@@ -1,0 +1,521 @@
+ bfd/acinclude.m4               |  2 +-
+ bfd/config.bfd                 |  5 +++
+ bfd/configure                  |  4 +-
+ binutils/configure             |  2 +-
+ binutils/dlltool.c             |  2 +-
+ binutils/dllwrap.c             |  2 +-
+ binutils/resrc.c               |  4 +-
+ gas/config/te-mint.h           | 31 ++++++++++++++
+ gas/configure.tgt              |  1 +
+ include/filenames.h            |  2 +-
+ include/getopt.h               |  2 +-
+ ld/Makefile.am                 |  3 ++
+ ld/Makefile.in                 |  6 +++
+ ld/configure                   |  2 +-
+ ld/configure.tgt               |  3 ++
+ ld/emulparams/m68katari.sh     | 12 ++++++
+ ld/emulparams/m68kmint.sh      | 18 ++++++++
+ ld/emulparams/m68kslb.sh       |  3 ++
+ ld/scripttempl/m68kmint.sc     | 96 ++++++++++++++++++++++++++++++++++++++++++
+ ld/scripttempl/m68kmint_slb.sc | 88 ++++++++++++++++++++++++++++++++++++++
+ 20 files changed, 277 insertions(+), 11 deletions(-)
+
+diff --git a/bfd/acinclude.m4 b/bfd/acinclude.m4
+index 0ba7957760d..25959f38f05 100644
+--- a/bfd/acinclude.m4
++++ b/bfd/acinclude.m4
+@@ -21,7 +21,7 @@ AC_DEFUN([BFD_BINARY_FOPEN],
+ [AC_REQUIRE([AC_CANONICAL_TARGET])
+ case "${host}" in
+ changequote(,)dnl
+-*-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows*)
++*-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows* | *-*-mint*)
+ changequote([,])dnl
+   AC_DEFINE(USE_BINARY_FOPEN, 1, [Use b modifier when opening binary files?]) ;;
+ esac])dnl
+diff --git a/bfd/config.bfd b/bfd/config.bfd
+index bbf12447517..5616f5c09df 100644
+--- a/bfd/config.bfd
++++ b/bfd/config.bfd
+@@ -855,6 +855,11 @@ case "${targ}" in
+     targ_selvecs="m68hc11_elf32_vec m68hc12_elf32_vec"
+     ;;
+ 
++  m68*-*-mint*)
++    targ_defvec=m68k_elf32_vec
++    targ_underscore=yes
++    ;;
++
+   m68*-*-*)
+     targ_defvec=m68k_elf32_vec
+     ;;
+diff --git a/bfd/configure b/bfd/configure
+index 5618c5d3217..01aa1b0aeb7 100755
+--- a/bfd/configure
++++ b/bfd/configure
+@@ -12094,7 +12094,7 @@ if test "${with_pkgversion+set}" = set; then :
+       *)   PKGVERSION="($withval) " ;;
+      esac
+ else
+-  PKGVERSION="(GNU Binutils) "
++  PKGVERSION="(GNU Binutils for MiNT) "
+ 
+ fi
+ 
+@@ -15179,7 +15179,7 @@ _ACEOF
+ 
+ 
+ case "${host}" in
+-*-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows*)
++*-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows* | *-*-mint*)
+ 
+ $as_echo "#define USE_BINARY_FOPEN 1" >>confdefs.h
+  ;;
+diff --git a/binutils/configure b/binutils/configure
+index 94a0d4a177e..4c89db67ea7 100755
+--- a/binutils/configure
++++ b/binutils/configure
+@@ -15676,7 +15676,7 @@ fi
+ 
+ 
+ case "${host}" in
+-*-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows*)
++*-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows* | *-*-mint*)
+ 
+ $as_echo "#define USE_BINARY_FOPEN 1" >>confdefs.h
+  ;;
+diff --git a/binutils/dlltool.c b/binutils/dlltool.c
+index 066c99a4d4f..788bae3495f 100644
+--- a/binutils/dlltool.c
++++ b/binutils/dlltool.c
+@@ -4256,7 +4256,7 @@ deduce_name (const char *prog_name)
+       if (*cp == '-')
+ 	dash = cp;
+       if (
+-#if defined(__DJGPP__) || defined (__CYGWIN__) || defined(__WIN32__)
++#if defined(__DJGPP__) || defined (__CYGWIN__) || defined(__WIN32__) || defined(__MINT__)
+ 	  *cp == ':' || *cp == '\\' ||
+ #endif
+ 	  *cp == '/')
+diff --git a/binutils/dllwrap.c b/binutils/dllwrap.c
+index bf119cee5d6..02f09eef0df 100644
+--- a/binutils/dllwrap.c
++++ b/binutils/dllwrap.c
+@@ -256,7 +256,7 @@ deduce_name (const char * name)
+ 	dash = cp;
+ 
+       if (
+-#if defined(__DJGPP__) || defined (__CYGWIN__) || defined(__WIN32__)
++#if defined(__DJGPP__) || defined (__CYGWIN__) || defined(__WIN32__) || defined(__MINT__)
+ 	  *cp == ':' || *cp == '\\' ||
+ #endif
+ 	  *cp == '/')
+diff --git a/binutils/resrc.c b/binutils/resrc.c
+index 130ff7b50b6..85c6f87c36a 100644
+--- a/binutils/resrc.c
++++ b/binutils/resrc.c
+@@ -388,7 +388,7 @@ look_for_default (char *cmd, const char *prefix, int end_prefix,
+   char *out = stpcpy (cmd + end_prefix, DEFAULT_PREPROCESSOR_CMD);
+ 
+   if (
+-#if defined (__DJGPP__) || defined (__CYGWIN__) || defined (_WIN32)
++#if defined (__DJGPP__) || defined (__CYGWIN__) || defined (_WIN32) || defined (__MINT__)
+       strchr (cmd, '\\') ||
+ #endif
+       strchr (cmd, '/'))
+@@ -505,7 +505,7 @@ read_rc_file (const char *filename, const char *preprocessor,
+ 	  if (*cp == '-')
+ 	    dash = cp;
+ 	  if (
+-#if defined (__DJGPP__) || defined (__CYGWIN__) || defined(_WIN32)
++#if defined (__DJGPP__) || defined (__CYGWIN__) || defined(_WIN32) || defined (__MINT__)
+ 	      *cp == ':' || *cp == '\\' ||
+ #endif
+ 	      *cp == '/')
+diff --git a/gas/config/te-mint.h b/gas/config/te-mint.h
+new file mode 100644
+index 00000000000..450bcfddb61
+--- /dev/null
++++ b/gas/config/te-mint.h
+@@ -0,0 +1,31 @@
++/* Copyright 2008 Free Software Foundation, Inc.
++
++   This file is part of GAS, the GNU Assembler.
++
++   GAS is free software; you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as
++   published by the Free Software Foundation; either version 3,
++   or (at your option) any later version.
++
++   GAS is distributed in the hope that it will be useful, but
++   WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
++   the GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with GAS; see the file COPYING.  If not, write to the Free
++   Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
++   02110-1301, USA.  */
++
++#define TE_MINT
++
++#define LOCAL_LABELS_DOLLAR 1
++#define LOCAL_LABELS_FB 1
++#define REGISTER_PREFIX_OPTIONAL 1
++
++/* These define interfaces.  */
++#ifdef   OBJ_HEADER
++#include OBJ_HEADER
++#else
++#include "obj-format.h"
++#endif
+diff --git a/gas/configure.tgt b/gas/configure.tgt
+index 7c66734e362..e88cacc0d07 100644
+--- a/gas/configure.tgt
++++ b/gas/configure.tgt
+@@ -300,6 +300,7 @@ case ${generic_target} in
+   m68k-*-linux-*)			fmt=elf em=linux ;;
+   m68k-*-uclinux*)			fmt=elf em=uclinux ;;
+   m68k-*-gnu*)				fmt=elf ;;
++  m68k-*-mint*)			fmt=elf em=mint bfd_gas=yes ;;
+   m68k-*-netbsd*)			fmt=elf em=nbsd ;;
+   m68k-*-haiku*)			fmt=elf em=haiku ;;
+ 
+diff --git a/include/filenames.h b/include/filenames.h
+index 3d76005ac37..551fc33b9fc 100644
+--- a/include/filenames.h
++++ b/include/filenames.h
+@@ -33,7 +33,7 @@ extern "C" {
+ #endif
+ 
+ #if defined(__MSDOS__) || (defined(_WIN32) && ! defined(__CYGWIN__)) || \
+-    defined(__OS2__)
++    defined(__OS2__) || defined (__MINT__)
+ #  ifndef HAVE_DOS_BASED_FILE_SYSTEM
+ #    define HAVE_DOS_BASED_FILE_SYSTEM 1
+ #  endif
+diff --git a/include/getopt.h b/include/getopt.h
+index cc69df7a3ea..609d55984a2 100644
+--- a/include/getopt.h
++++ b/include/getopt.h
+@@ -105,7 +105,7 @@ struct option
+    to find the declaration so provide a fully prototyped one.  If it
+    is 1, we found it so don't provide any declaration at all.  */
+ #if !HAVE_DECL_GETOPT
+-#if defined (__GNU_LIBRARY__) || defined (HAVE_DECL_GETOPT)
++#if defined (__GNU_LIBRARY__) || defined (__MINT__) || defined (HAVE_DECL_GETOPT)
+ /* Many other libraries have conflicting prototypes for getopt, with
+    differences in the consts, in unistd.h.  To avoid compilation
+    errors, only prototype getopt for the GNU C library.  */
+diff --git a/ld/Makefile.am b/ld/Makefile.am
+index f9ee05b1400..8b1770aac6f 100644
+--- a/ld/Makefile.am
++++ b/ld/Makefile.am
+@@ -320,6 +320,9 @@ ALL_EMULATION_SOURCES = \
+ 	em68hc12elfb.c \
+ 	em68kelf.c \
+ 	em68kelfnbsd.c \
++	em68kmint.c \
++	em68katari.c \
++	em68kslb.c \
+ 	em9s12zelf.c \
+ 	emcorepe.c \
+ 	emn10200.c \
+diff --git a/ld/Makefile.in b/ld/Makefile.in
+index abb0565718f..2e5591ad941 100644
+--- a/ld/Makefile.in
++++ b/ld/Makefile.in
+@@ -831,6 +831,9 @@ ALL_EMULATION_SOURCES = \
+ 	em68hc12elfb.c \
+ 	em68kelf.c \
+ 	em68kelfnbsd.c \
++	em68kmint.c \
++	em68katari.c \
++	em68kslb.c \
+ 	em9s12zelf.c \
+ 	emcorepe.c \
+ 	emn10200.c \
+@@ -1529,6 +1532,9 @@ distclean-compile:
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/em68hc12elfb.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/em68kelf.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/em68kelfnbsd.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/em68kmint.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/em68katari.Po@am__quote@
++@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/em68kslb.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/em9s12zelf.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emcorepe.Po@am__quote@
+ @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emmo.Po@am__quote@
+diff --git a/ld/configure b/ld/configure
+index ba1e5e2a215..7d56f6416b2 100755
+--- a/ld/configure
++++ b/ld/configure
+@@ -18741,7 +18741,7 @@ done
+ 
+ 
+ case "${host}" in
+-*-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows*)
++*-*-msdos* | *-*-go32* | *-*-mingw32* | *-*-cygwin* | *-*-windows* | *-*-mint*)
+ 
+ $as_echo "#define USE_BINARY_FOPEN 1" >>confdefs.h
+  ;;
+diff --git a/ld/configure.tgt b/ld/configure.tgt
+index f937f78b876..0dbbf17d3f4 100644
+--- a/ld/configure.tgt
++++ b/ld/configure.tgt
+@@ -507,6 +507,9 @@ m68*-*-netbsd*)	targ_emul=m68kelfnbsd
+ 			;;
+ m68*-*-haiku*)		targ_emul=m68kelf
+ 			;;
++m68*-*-mint*)		targ_emul=m68kmint
++			targ_extra_emuls="m68katari m68kslb"
++			;;
+ m68*-*-*)		targ_emul=m68kelf
+ 			;;
+ mcore-*-pe)		targ_emul=mcorepe ;
+diff --git a/ld/emulparams/m68katari.sh b/ld/emulparams/m68katari.sh
+new file mode 100644
+index 00000000000..cf0eba93c74
+--- /dev/null
++++ b/ld/emulparams/m68katari.sh
+@@ -0,0 +1,12 @@
++SCRIPT_NAME=m68kmint
++OUTPUT_FORMAT="elf32-m68k"
++RELOCATEABLE_OUTPUT_FORMAT="elf32-m68k"
++#NO_REL_RELOCS=yes
++MAXPAGESIZE="CONSTANT (MAXPAGESIZE)"
++COMMONPAGESIZE="CONSTANT (COMMONPAGESIZE)"
++ARCH=m68k
++MACHINE=
++NOP=0x4e714e71
++TEMPLATE_NAME=elf
++EXTRA_EM_FILE=m68kelf
++MINT=0
+diff --git a/ld/emulparams/m68kmint.sh b/ld/emulparams/m68kmint.sh
+new file mode 100644
+index 00000000000..1587f074273
+--- /dev/null
++++ b/ld/emulparams/m68kmint.sh
+@@ -0,0 +1,18 @@
++source_sh ${srcdir}/emulparams/m68katari.sh
++
++MINT="0x4d694e54 /* MiNT */"
++EXTRA_HEADER="$(cat << EOF
++LONG(0x203a001a);                      /* g_jump_entry[0] */
++    LONG(0x4efb08fa);                  /* g_jump_entry[0] */
++    LONG(0x108);                       /* e_info */
++    LONG(.data_start - .entry );       /* e_text */
++    LONG(.bss_start - .data_start );   /* e_data */
++    LONG(.prg_end - .bss_start );      /* e_bss */
++    LONG(0);                           /* e_syms */
++    LONG(.entry);                      /* e_entry */
++    . = . + 0x10;
++    LONG(0);                           /* g_stkpos (filled from tostool) */
++    LONG(1);                           /* g_symbol_format */
++    . = . + 0xAC;
++EOF
++)"
+diff --git a/ld/emulparams/m68kslb.sh b/ld/emulparams/m68kslb.sh
+new file mode 100644
+index 00000000000..128f6e8118a
+--- /dev/null
++++ b/ld/emulparams/m68kslb.sh
+@@ -0,0 +1,3 @@
++source_sh ${srcdir}/emulparams/m68katari.sh
++
++SCRIPT_NAME=m68kmint_slb
+diff --git a/ld/scripttempl/m68kmint.sc b/ld/scripttempl/m68kmint.sc
+new file mode 100644
+index 00000000000..dc6f3962d3e
+--- /dev/null
++++ b/ld/scripttempl/m68kmint.sc
+@@ -0,0 +1,96 @@
++cat <<EOF
++${RELOCATING+OUTPUT_FORMAT(${OUTPUT_FORMAT})}
++${RELOCATING-OUTPUT_FORMAT(${RELOCATEABLE_OUTPUT_FORMAT})}
++SECTIONS
++{
++  ${RELOCATING+".mint_prg_info (INFO) :
++  {
++    SHORT(0x601a);
++    LONG(.data_start - .text_start );
++    LONG(.bss_start - .data_start );
++    LONG(.prg_end - .bss_start );
++    LONG(0);
++    LONG($MINT);
++    LONG(.startup_size); /* needed and setted by tostool */
++    SHORT(0);
++  }"}
++  .text : SUBALIGN(2)
++  {
++    ${RELOCATING+.text_start = .;}
++
++    ${EXTRA_HEADER}
++
++    .entry = .;
++    KEEP(*(.text.entry.mint)) KEEP(*crt0*.o(.text))
++    .startup_size = . - .entry;
++    *(.text)
++    *(.text.unlikely .text.*_unlikely)
++    *(.text.exit .text.exit.*)
++    *(.text.startup .text.startup.*)
++    *(.text.hot .text.hot.*)
++    *(.stub .text.* .gnu.linkonce.t.*)
++    *(.rodata .rodata.*)
++
++    /* .ctors */
++    . = ALIGN(4);
++    ___CTOR_LIST__ = .;
++    LONG((___CTOR_END__ - ___CTOR_LIST__) / 4 - 2);
++    KEEP (*(.ctors))
++    KEEP (*(SORT(.ctors.*)))
++    LONG(0);
++    ___CTOR_END__ = .;
++
++    /* .dtors */
++    ___DTOR_LIST__ = .;
++    LONG((___DTOR_END__ - ___DTOR_LIST__) / 4 - 2);
++    KEEP (*(.dtors))
++    KEEP (*(SORT(.dtors.*)))
++    LONG(0);
++    ___DTOR_END__ = .;
++    ___EH_FRAME_BEGIN__ = . ;
++    KEEP(*(.eh_frame))
++    ___EH_FRAME_END__ = . ;
++    LONG(0);
++    ${RELOCATING+_etext = .;}
++    ${RELOCATING+__etext = .;}
++  }
++  .data . : SUBALIGN(2)
++  {
++    ${RELOCATING+.data_start = .;}
++    *(.data) *(.data.*) *(.gnu.linkonce.d.*) *(.gcc_except_table) *(.gcc_except_table.*)
++    . = ALIGN(2);
++    ${RELOCATING+_edata = .;}
++    ${RELOCATING+__edata = .;}
++  }
++  .tdata . : SUBALIGN(4)
++  {
++    ___TLS_DATA__ = .;
++    *(.tdata) *(.tdata.*)
++    . = ALIGN(2);
++    ___TLS_DATA_SIZE__ = . - ___TLS_DATA__;
++  }
++  .tbss . : SUBALIGN(4)
++  {
++     *(.tbss) *(.tbss.*)
++    ___TLS_SIZE__ = . - ___TLS_DATA__;
++  }
++  .bss . : SUBALIGN(2)
++  {
++    ${RELOCATING+.bss_start = .;}
++    *(.bss) *(COMMON) *(.bss.*) *(.gnu.linkonce.b.*)
++    . = ALIGN(4);
++    ${RELOCATING+___tls_main = .;}
++    . = . + ___TLS_SIZE__;
++    . = ALIGN(2);
++    ${RELOCATING+_end = .;}
++    ${RELOCATING+__end = .;}
++    ${RELOCATING+.prg_end = .;}
++  }
++
++EOF
++
++. $srcdir/scripttempl/DWARF.sc
++
++cat <<EOF
++}
++EOF
+diff --git a/ld/scripttempl/m68kmint_slb.sc b/ld/scripttempl/m68kmint_slb.sc
+new file mode 100644
+index 00000000000..9e9132ea1af
+--- /dev/null
++++ b/ld/scripttempl/m68kmint_slb.sc
+@@ -0,0 +1,88 @@
++cat <<EOF
++${RELOCATING+OUTPUT_FORMAT(${OUTPUT_FORMAT})}
++${RELOCATING-OUTPUT_FORMAT(${RELOCATEABLE_OUTPUT_FORMAT})}
++SECTIONS
++{
++  ${RELOCATING+".mint_prg_info (INFO) :
++  {
++    SHORT(0x601a);
++    LONG(.data_start - .text_start );
++    LONG(.bss_start - .data_start );
++    LONG(.prg_end - .bss_start );
++    LONG(0);
++    LONG(0);
++    LONG(0); 
++    SHORT(0);
++  }"}
++  .text : SUBALIGN(2)
++  {
++    ${RELOCATING+.text_start = .;}
++
++    /* slb_head + slb_exports */
++    KEEP(*(.slb_head))
++    LONG((.slb_export_end - .slb_export_start) / 4);
++    .slb_export_start = .;
++    KEEP(*(SORT(.gnu.linkonce.slb_export.*)))
++    .slb_export_end = .;
++
++    *(.text)
++    *(.text.unlikely .text.*_unlikely)
++    *(.text.exit .text.exit.*)
++    *(.text.startup .text.startup.*)
++    *(.text.hot .text.hot.*)
++    *(.stub .text.* .gnu.linkonce.t.*)
++    *(.rodata .rodata.*)
++
++    /* .ctors */
++    . = ALIGN(4);
++    ___CTOR_LIST__ = .;
++    LONG((___CTOR_END__ - ___CTOR_LIST__) / 4 - 2);
++    KEEP (*(.ctors))
++    KEEP (*(SORT(.ctors.*)))
++    LONG(0);
++    ___CTOR_END__ = .;
++
++    /* .dtors */
++    ___DTOR_LIST__ = .;
++    LONG((___DTOR_END__ - ___DTOR_LIST__) / 4 - 2);
++    KEEP (*(.dtors))
++    KEEP (*(SORT(.dtors.*)))
++    LONG(0);
++    ___DTOR_END__ = .;
++    ___EH_FRAME_BEGIN__ = . ;
++    KEEP(*(.eh_frame))
++    ___EH_FRAME_END__ = . ;
++    LONG(0);
++    ${RELOCATING+_etext = .;}
++    ${RELOCATING+__etext = .;}
++  }
++  .data . : SUBALIGN(2)
++  {
++    ${RELOCATING+.data_start = .;}
++    *(.data) *(.data.*) *(.gnu.linkonce.d.*) *(.gcc_except_table) *(.gcc_except_table.*)
++    . = ALIGN(2);
++    ${RELOCATING+_edata = .;}
++    ${RELOCATING+__edata = .;}
++  }
++  /DISCARD/ : /* thread local storage not allowed in slb's */
++  {
++    *(.tdata) *(.tdata.*)
++    *(.tbss) *(.tbss.*)
++  }
++  .bss . : SUBALIGN(2)
++  {
++    ${RELOCATING+.bss_start = .;}
++    *(.bss) *(COMMON) *(.bss.*) *(.gnu.linkonce.b.*)
++    . = ALIGN(2);
++    ${RELOCATING+_end = .;}
++    ${RELOCATING+__end = .;}
++    ${RELOCATING+.prg_end = .;}
++  }
++
++EOF
++
++. $srcdir/scripttempl/DWARF.sc
++
++cat <<EOF
++}
++EOF
