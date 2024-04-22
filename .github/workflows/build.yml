@@ -28,16 +28,16 @@ jobs:
     steps:
       - name: 'Setup MSYS2'
         uses: msys2/setup-msys2@v2
-          with:
-            msystem: ucrt64
-            update: true
+        with:
+          msystem: ucrt64
+          update: true
 
 
       - name: '🧰 Checkout'
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-        run: git config --global core.autocrlf input
-        uses: actions/checkout@v3
+      - run: git config --global core.autocrlf input
+      - uses: actions/checkout@v3
 
       # Runs a single command using the runners shell
       - name: Run a one-line script
