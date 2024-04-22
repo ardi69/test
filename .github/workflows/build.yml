@@ -30,25 +30,25 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           msystem: ucrt64
-          update: true
-          install: >-
-            isl
-            isl-devel
-            mpc
-            mpc-devel
-            gmp
-            gmp-devel
-            mpfr
-            mpfr-devel
-            libiconv
-            libiconv-devel
-            gcc
-            make
-            bison
-            texinfo
-            flex
-            patch
-            diffutils
+          update: false #true
+          pacboy: >-
+            isl:p
+            isl-devel:p
+            mpc:p
+            mpc-devel:p
+            gmp:p
+            gmp-devel:p
+            mpfr:p
+            mpfr-devel:p
+            libiconv:p
+            libiconv-devel:p
+            gcc:p
+            make:p
+            bison:p
+            texinfo:p
+            flex:p
+            patch:p
+            diffutils:p
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
 #      - run: git config --global core.autocrlf input
