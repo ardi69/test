@@ -31,12 +31,12 @@ jobs:
         with:
           msystem: ucrt64
           update: false #true
-          install: >-
             #isl-devel
             #mpc-devel
             #gmp-devel
             #mpfr-devel
             #libiconv-devel
+          install: >-
             bison
             texinfo
             flex
