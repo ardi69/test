@@ -54,8 +54,6 @@ if [ ! -f $builddir/_binutils-configured ]; then
 		--prefix=$prefix --target=$target --disable-nls --disable-dependency-tracking --disable-werror \
 		--enable-warn-rwx-segments=no \
 		|| { echo "Error configuring binutils"; exit 1; }
-  grep -r $builddir -e DEFAULT_LD_WARN_RWX_SEGMENTS
-  exit 1
 	touch $builddir/_binutils-configured
 fi
 
@@ -64,6 +62,8 @@ if [ ! -f $builddir/_binutils-build ]; then
 	$MAKE || { echo "Error building binutils"; exit 1; }
 	touch $builddir/_binutils-build
 fi
+  grep -r $builddir -e DEFAULT_LD_WARN_RWX_SEGMENTS
+  exit 1
 
 if [ ! -f $builddir/_binutils-installed ]; then
 	# dev-mode on
