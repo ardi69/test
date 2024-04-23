@@ -48,13 +48,14 @@ function ftime() {
 
 mkdir -p $builddir/binutils && cd $builddir/binutils || { echo "Can't change dir to $builddir/binutils"; exit 1; }
 
-CFLAGS=$cflags LDFLAGS=$ldflags ../../src/$BINUTILS_SRC/configure --help=recursiv
-exit 1
 if [ ! -f $builddir/_binutils-configured ]; then
 	rm -fr * # force build & install
 	CFLAGS=$cflags LDFLAGS=$ldflags ../../src/$BINUTILS_SRC/configure \
 		--prefix=$prefix --target=$target --disable-nls --disable-dependency-tracking --disable-werror \
+		--enable-warn-rwx-segments=no \
 		|| { echo "Error configuring binutils"; exit 1; }
+  grep -r $builddir -e DEFAULT_LD_WARN_RWX_SEGMENTS
+  exit 1
 	touch $builddir/_binutils-configured
 fi
 
