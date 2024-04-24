@@ -27,7 +27,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: 'Setup ubuntu'
-        run: sudo apt-get install -y libmpfr-devel libmpc-devel libisl-devel
+        run: sudo apt-get install -y libmpfr-dev libmpc-dev libisl-dev
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
 #      - run: git config --global core.autocrlf input
