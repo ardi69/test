@@ -52,4 +52,4 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Run a script
-        run: ./build-devkit.sh
+        run: bash ./build-devkit.sh
